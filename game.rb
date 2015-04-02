@@ -39,7 +39,7 @@ class Game
       end
       @turn = (@turn == :b) ? :w : :b
     end
-
+    puts "#{color_hash[@turn]} loses!"
   end
 
 
@@ -92,7 +92,6 @@ end
 
 
 class Player
-
   def initialize(color)
     @color = color
   end
