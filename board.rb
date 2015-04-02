@@ -20,6 +20,10 @@ class Board
     @grid[row][col] = piece
   end
 
+  def valid_pos?(pos)
+    pos.first.between?(0, 7) && pos.last.between?(0, 7)
+  end
+
   def render
     puts "  A B C D E F G H"
     @grid.each_with_index do |row, r_idx|
