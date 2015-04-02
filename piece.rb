@@ -11,13 +11,30 @@ class Piece
     [-1, -1]
   ]
 
-  attr_accessor :pos, :is_king
+  attr_accessor :pos
+  attr_reader :color
+
+  def is_king?
+    @is_king
+  end
+  def symbol
+    if is_king?
+      { :w => '☆', :b => '★'}
+    else
+      { :w => '◎', :b => '◉'}
+    end
+  end
 
   def initialize(board, color, pos)
-    @board = board
     @color = color
     @is_king = false
     @pos = pos
+    @board = board
+    place_on_board
+  end
+
+  def place_on_board
+    @board[pos] = self
   end
 
   def move_diffs
@@ -42,8 +59,14 @@ class Piece
 
   def perform_slide(dest)
     return false unless move_diffs.include?(dest)
+    @board[pos] = nil
     @pos = dest
+    @board[pos] = self
 
     true
+  end
+
+  def perform_jump(dest)
+
   end
 end
