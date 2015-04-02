@@ -2,11 +2,17 @@ require_relative 'piece.rb'
 require 'colorize'
 class Board
 
-  def self.default
+  def self.checkered?(row, col)
+    (row.even? && col.even?) || (row.odd? && col.odd?)
+  end
+
+  def self.empty
       Array.new(8) { Array.new(8) }
   end
 
-  def initialize(grid = self.class.default)
+  attr_reader :grid
+
+  def initialize(grid = self.class.empty)
     @grid = grid
   end
 
@@ -20,6 +26,15 @@ class Board
     @grid[row][col] = piece
   end
 
+  def lose?(color)
+    pieces = []
+    grid.each do |row|
+      return false if row.compact.any? { |tile| tile.color == color }
+    end
+
+    true
+  end
+
   def valid_pos?(pos)
     pos.first.between?(0, 7) && pos.last.between?(0, 7)
   end
@@ -31,13 +46,13 @@ class Board
       row_num = r_idx + 1
       row.each_with_index do |tile, c_idx|
         if tile.nil?
-          if (r_idx.even? && c_idx.even?) || (r_idx.odd? && c_idx.odd?)
+          if self.class.checkered?(r_idx, c_idx)
             line += "  ".on_light_white
           else
             line += "  ".on_light_black
           end
         else
-          if (r_idx.even? && c_idx.even?) || (r_idx.odd? && c_idx.odd?)
+          if self.class.checkered?(r_idx, c_idx)
             line += (" " + tile.symbol[tile.color]).on_light_white
           else
             line += (" " + tile.symbol[tile.color]).on_light_black
@@ -48,4 +63,6 @@ class Board
     end
 
   end
+
+
 end

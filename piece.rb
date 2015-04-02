@@ -37,10 +37,6 @@ class Piece
     place_on_board
   end
 
-  def place_on_board
-    @board[pos] = self
-  end
-
   def move_diffs
     deltas = nil
     available_dirs = []
@@ -59,21 +55,6 @@ class Piece
     end
 
     available_dirs
-  end
-
-  def maybe_promote
-    if is_king?
-      return false
-    else
-      if pos.first == 0 && color == :w
-        true
-      elsif pos.first == 7 && color == :b
-        true
-      else
-        false
-      end
-    end
-
   end
 
   def perform_slide(dest)
@@ -119,22 +100,41 @@ class Piece
     end
   end
 
-  def chain_moves(move_sequence)
-    move_sequence.each do |move|
-      if perform_jump(move)
-        next
-      else
-        raise InvalidMoveError, "A move in the sequence is invalid."
+  def valid_move_seq?(move_sequence)
+      grid_dup = Array.new(8) { Array.new(8) }
+      @board.grid.each_with_index do |row, r_idx|
+        row.each_with_index do |tile, c_idx|
+          grid_dup[r_idx][c_idx] = tile
+        end
       end
-    end
+
+      piece_dup = self.class.new(Board.new(grid_dup), color, pos)
+      begin
+        piece_dup.perform_moves!(move_sequence)
+      rescue InvalidMoveError => e
+        puts "Error: #{e.message}"
+        return false
+      else
+        true
+      end
+
   end
-  # def valid_move_seq?(move_sequence)
-  #     grid_
-  #     piece_dup = self.class.new()
-  #
-  # end
+
+  def perform_moves(move_sequence)
+    if valid_move_seq?(move_sequence)
+      perform_moves!(move_sequence)
+    else
+      raise InvalidMoveError, "Try another sequence."
+    end
+
+    @is_king = true if maybe_promote
+  end
 
   private
+
+    def place_on_board
+      @board[pos] = self
+    end
 
     def can_jump?(jumped_pos, behind_pos)
       (@board[jumped_pos].color != self.color) && (@board[behind_pos].nil?)
@@ -152,6 +152,30 @@ class Piece
       @board[pos] = nil
       @board[dest] = self
       @pos = dest
+    end
+
+    def chain_moves(move_sequence)
+      move_sequence.each do |move|
+        if perform_jump(move)
+          next
+        else
+          raise InvalidMoveError, "A move in the sequence is invalid."
+        end
+      end
+    end
+
+    def maybe_promote
+      if is_king?
+        return false
+      else
+        if pos.first == 0 && color == :w
+          true
+        elsif pos.first == 7 && color == :b
+          true
+        else
+          false
+        end
+      end
     end
 
 end
