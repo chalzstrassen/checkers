@@ -4,6 +4,10 @@ class Piece
     [1, -1]
   ]
 
+  W_PAWN_DELTAS = [
+    [-1, -1],
+    [-1,  1]
+  ]
   KING_DELTAS = [
     [ 1,  1],
     [ 1, -1],
@@ -40,11 +44,12 @@ class Piece
   def move_diffs
     deltas = nil
     available_dirs = []
+
     if @is_king
       deltas = KING_DELTAS
     else
       deltas = PAWN_DELTAS
-      deltas = -deltas if @color == :w
+      deltas = W_PAWN_DELTAS if @color == :w
     end
 
     deltas.each do |move|
@@ -63,21 +68,40 @@ class Piece
       new_pos = [pos.first + diff.first, pos.last + diff.last]
       move_to_arr << new_pos if @board[new_pos].nil?
     end
+
     if move_to_arr.empty? || !move_to_arr.include?(dest)
       return false
     else
       @board[pos] = nil
       @board[dest] = self
       @pos = dest
-      true
     end
 
+    true
   end
 
   def perform_jump(dest)
+    jumped_piece_pos = []
     move_diffs.each do |diff|
-
+      jumped_pos = [pos.first + diff.first, pos.last + diff.last]
+      behind_pos = [jumped_pos.first + diff.first, jumped_pos.last + diff.last]
+      next if @board[jumped_pos].nil?
+      if (@board[jumped_pos].color != self.color) && (@board[behind_pos].nil?)
+         jumped_piece_pos = jumped_pos
+         break if behind_pos == dest
+      end
     end
 
+    if jumped_piece_pos.empty?
+      return false
+    else
+      @board[pos] = nil
+      @board[jumped_piece_pos].pos = nil
+      @board[jumped_piece_pos] = nil
+      @board[dest] = self
+      @pos = dest
+    end
+
+    true
   end
 end
