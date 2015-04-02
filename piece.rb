@@ -39,7 +39,7 @@ class Piece
 
   def move_diffs
     deltas = nil
-    available_moves = []
+    available_dirs = []
     if @is_king
       deltas = KING_DELTAS
     else
@@ -50,23 +50,34 @@ class Piece
     deltas.each do |move|
       new_pos = [pos.first + move.first, pos.last + move.last]
       if new_pos.first.between?(0, 7) && new_pos.last.between?(0, 7)
-        available_moves << new_pos
+        available_dirs << move
       end
     end
 
-    available_moves
+    available_dirs
   end
 
   def perform_slide(dest)
-    return false unless move_diffs.include?(dest)
-    @board[pos] = nil
-    @pos = dest
-    @board[pos] = self
+    move_to_arr = []
+    move_diffs.each do |diff|
+      new_pos = [pos.first + diff.first, pos.last + diff.last]
+      move_to_arr << new_pos if @board[new_pos].nil?
+    end
+    if move_to_arr.empty? || !move_to_arr.include?(dest)
+      return false
+    else
+      @board[pos] = nil
+      @board[dest] = self
+      @pos = dest
+      true
+    end
 
-    true
   end
 
   def perform_jump(dest)
+    move_diffs.each do |diff|
+
+    end
 
   end
 end
